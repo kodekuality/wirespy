@@ -1,0 +1,4 @@
+rootProject.name = 'wirespy'
+include 'wirespy-server'
+include 'wirespy-app'
+
