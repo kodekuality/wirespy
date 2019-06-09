@@ -40,12 +40,12 @@ Include dependencies
     <dependency>
         <groupId>org.kodekuality</groupId>
         <artifactId>wirespy-server</artifactId>
-        <version>version</version>
+        <version>${wirespy.version}</version>
     </dependency>
     <dependency>
         <groupId>org.kodekuality</groupId>
         <artifactId>wirespy-client</artifactId>
-        <version>version</version>
+        <version>${wirespy.version}</version>
     </dependency>
     
     Check versions above

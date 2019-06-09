@@ -44,6 +44,10 @@ public class WirespyClient {
         this.captureService = captureService;
     }
 
+    public void reset () {
+        messageCollector.reset();
+    }
+
     public List<Message> allTraffic() {
         return messageCollector.getMessages();
     }

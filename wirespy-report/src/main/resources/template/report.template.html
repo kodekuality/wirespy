@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="sequence-diagram-resources/sequence-diagram.css">
+</head>
+<body>
+<sequence-diagram-semantic>
+    <header>
+        {{#entities}}
+        <entity>{{.}}</entity>
+        {{/entities}}
+    </header>
+
+    {{#messages}}
+    <action><a href="#message{{index}}">{{index}}: <from>{{ from }}</from> to <to>{{ to }}</to></a></action>
+    {{/messages}}
+
+</sequence-diagram-semantic>
+<script src="sequence-diagram-resources/convert.js"></script>
+
+{{#messages}}
+<h2 id="message{{index}}">{{index}}: From {{ from }} to {{ to }}</h2>
+
+<div>
+    {{#eq type "FixFrame"}}
+    <h3>FIX</h3>
+    {{#frame.fields}}
+    <pre>{{tag}}={{value}}</pre>
+    {{/frame.fields}}
+    {{/eq}}
+    {{#eq type "HttpRequestFrame"}}
+    <h3>Http Request</h3>
+    Request <pre>{{ frame.requestLine }}</pre>
+    {{#optionalPresentString frame.content}}
+    Body <pre>{{this}}</pre>
+    {{/optionalPresentString}}
+    {{/eq}}
+    {{#eq type "HttpResponseFrame"}}
+    <h3>Http Response</h3>
+    Status <pre>{{ frame.statusLine }}</pre>
+    {{#optionalPresentString frame.content}}
+    Body <pre>{{this}}</pre>
+    {{/optionalPresentString}}
+    {{/eq}}
+</div>
+{{/messages}}
+</body>
+</html>

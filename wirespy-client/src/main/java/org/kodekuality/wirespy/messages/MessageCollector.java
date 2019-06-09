@@ -16,4 +16,8 @@ public class MessageCollector implements Consumer<Message> {
     public List<Message> getMessages() {
         return Collections.unmodifiableList(messages);
     }
+
+    public void reset() {
+        messages.clear();
+    }
 }
