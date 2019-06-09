@@ -53,9 +53,7 @@ Include dependencies
 Start server and interact with it using the client.
 
 ```java
-try (WirespyServer wirespyServer = WirespyServer.wirespyServer(9191)) {
-    wirespyServer.start();
-
+try (WirespyServer wirespyServer = WirespyServer.wirespyServer(9191).start()) {
     WirespyClient wirespyClient = WirespyClient.wirespyClient(9191);
     wirespyClient
             .from("UI", 8081)
