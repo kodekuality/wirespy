@@ -6,4 +6,5 @@ include 'wirespy-proxy'
 include 'wirespy-watcher'
 include 'wirespy-protocol-http'
 include 'wirespy-protocol'
+include 'wirespy-testcontainers'
 

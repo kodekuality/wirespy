@@ -3,7 +3,7 @@ package org.kodekuality.wirespy.app;
 
 import org.kodekuality.wirespy.proxy.WireSpyProxy;
 
-public class WirespyApp {
+public class WireSpyApp {
     public static void main(String[] args) throws Exception {
         WireSpyProxy.from(Integer.parseInt(getString("INPUT_PORT", "9090")))
                 .to(getString("TARGET_HOST", "localhost"), Integer.parseInt(getString("TARGET_PORT", "8080")))

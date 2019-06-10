@@ -48,6 +48,6 @@ jib {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.kodekuality.wirespy.app.WirespyApp'
+        attributes 'Main-Class': 'org.kodekuality.wirespy.app.WireSpyApp'
     }
 }
