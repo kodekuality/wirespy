@@ -11,7 +11,9 @@ Wirespy is an inspectable and programmable TCP Proxy.
 | Module | Version |
 |--------|---------|
 | Server | [ ![Download](https://api.bintray.com/packages/kodekuality/maven/wirespy-server/images/download.svg) ](https://bintray.com/kodekuality/maven/wirespy-server/_latestVersion) |
-| Server | [ ![Download](https://api.bintray.com/packages/kodekuality/maven/wirespy-client/images/download.svg) ](https://bintray.com/kodekuality/maven/wirespy-client/_latestVersion) |
+| Client | [ ![Download](https://api.bintray.com/packages/kodekuality/maven/wirespy-client/images/download.svg) ](https://bintray.com/kodekuality/maven/wirespy-client/_latestVersion) |
+| Report | [ ![Download](https://api.bintray.com/packages/kodekuality/maven/wirespy-report/images/download.svg) ](https://bintray.com/kodekuality/maven/wirespy-report/_latestVersion) |
+| Junit4 | [ ![Download](https://api.bintray.com/packages/kodekuality/maven/wirespy-junit4/images/download.svg) ](https://bintray.com/kodekuality/maven/wirespy-junit4/_latestVersion) |
 
 ## Why?
 
@@ -24,8 +26,7 @@ Wirespy is divided into two main components.
 The server and the client. 
 The server is at the core of the capture. 
 It exposes a JSON Admin interface which allows clients to setup new proxies.
-
- and the server responds with two new ports.
+The process can be described as following:
 
 - Clients request for new TCP session (port, targetHost, targetPort)
 - Server responds with two new port numbers

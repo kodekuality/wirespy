@@ -101,7 +101,7 @@ public class WirespyRule implements TestRule {
                             e.printStackTrace();
                         }
                     });
-                    client.stop();
+                    client.close();
                 }
             }
         };
