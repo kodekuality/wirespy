@@ -25,9 +25,9 @@ public class SpyTcpProxyService implements Closeable {
     private final List<ServerSocket> serverSockets = new CopyOnWriteArrayList<>();
     private final ExecutorService executorService = new ThreadPoolExecutor(10, 100, 1, TimeUnit.SECONDS, new BlockingArrayQueue<>());
 
-    public SpyTcpSession startSpySession(SpySource spySource, SpyTarget spyTarget) throws IOException {
-        ServerSocket inStreamServerSocket = new ServerSocket(0);
-        ServerSocket outStreamServerSocket = new ServerSocket(0);
+    public SpyTcpSession startSpySession(SpySource spySource, SpyTarget spyTarget, int inStreamPort, int outStreamPort) throws IOException {
+        ServerSocket inStreamServerSocket = new ServerSocket(inStreamPort);
+        ServerSocket outStreamServerSocket = new ServerSocket(outStreamPort);
         ServerSocket sourceServerSocket = new ServerSocket(spySource.getPort());
 
         serverSockets.add(inStreamServerSocket);

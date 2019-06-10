@@ -58,8 +58,8 @@ public class WirespyServerTest {
             HttpResponse<AddProxyResponse> response = Unirest.post(String.format("http://localhost:%d/__admin/add", wirespyServer.getPort()))
                     .body(new AddProxyRequest(
                             "SystemA", 8081,
-                            "SystemB", "localhost", 8082
-                    ))
+                            0, "SystemB", "localhost", 8082,
+                            0))
                     .asObject(AddProxyResponse.class);
 
             expectedException.expect(TimeoutException.class);
@@ -77,8 +77,8 @@ public class WirespyServerTest {
             HttpResponse<AddProxyResponse> response = Unirest.post(String.format("http://localhost:%d/__admin/add", wirespyServer.getPort()))
                     .body(new AddProxyRequest(
                             "SystemA", 8081,
-                            "SystemB", "localhost", 8082
-                    ))
+                            0, "SystemB", "localhost", 8082,
+                            0))
                     .asObject(AddProxyResponse.class);
 
             Socket inStream = new Socket("localhost", response.getBody().getInStreamPort());
@@ -97,8 +97,8 @@ public class WirespyServerTest {
             HttpResponse<AddProxyResponse> response = Unirest.post(String.format("http://localhost:%d/__admin/add", wirespyServer.getPort()))
                     .body(new AddProxyRequest(
                             "SystemA", 8081,
-                            "SystemB", "localhost", 8082
-                    ))
+                            0, "SystemB", "localhost", 8082,
+                            0))
                     .asObject(AddProxyResponse.class);
 
             Socket inStream = new Socket("localhost", response.getBody().getInStreamPort());
@@ -118,8 +118,8 @@ public class WirespyServerTest {
             HttpResponse<AddProxyResponse> response = Unirest.post(String.format("http://localhost:%d/__admin/add", wirespyServer.getPort()))
                     .body(new AddProxyRequest(
                             "SystemA", 8081,
-                            "SystemB", "localhost", 8082
-                    ))
+                            0, "SystemB", "localhost", 8082,
+                            0))
                     .asObject(AddProxyResponse.class);
 
             Socket inStream = new Socket("localhost", response.getBody().getInStreamPort());
@@ -143,8 +143,8 @@ public class WirespyServerTest {
             HttpResponse<AddProxyResponse> response = Unirest.post(String.format("http://localhost:%d/__admin/add", wirespyServer.getPort()))
                     .body(new AddProxyRequest(
                             "SystemA", 8081,
-                            "SystemB", "localhost", 8082
-                    ))
+                            0, "SystemB", "localhost", 8082,
+                            0))
                     .asObject(AddProxyResponse.class);
 
             Socket inStream = new Socket("localhost", response.getBody().getInStreamPort());

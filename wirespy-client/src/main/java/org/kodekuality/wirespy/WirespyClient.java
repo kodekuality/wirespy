@@ -14,6 +14,7 @@ import org.kodekuality.wirespy.service.WirespyCaptureService;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
+import java.util.function.Function;
 
 public class WirespyClient implements Closeable {
     private static final MessageCollector MESSAGE_COLLECTOR = new MessageCollector();
@@ -95,24 +96,66 @@ public class WirespyClient implements Closeable {
             this.targetPort = targetPort;
         }
 
+        public SpyPortsBuilder spyOn (int inboundSpyPort, int outboudSpyPort) {
+            return new SpyPortsBuilder(
+                    sourceName, sourcePort,
+                    targetName, targetHost, targetPort,
+                    inboundSpyPort, outboudSpyPort
+            );
+        }
+
         public WirespyClient as (Protocol protocol) {
+            return new SpyPortsBuilder(
+                    sourceName, sourcePort,
+                    targetName, targetHost, targetPort,
+                    0, 0
+            ).as(protocol);
+        }
+    }
+
+    public class SpyPortsBuilder {
+        private final String sourceName;
+        private final int sourcePort;
+        private final String targetName;
+        private final String targetHost;
+        private final int targetPort;
+        private final int inboundSpyPort;
+        private final int outboundSpyPort;
+
+        public SpyPortsBuilder(String sourceName, int sourcePort, String targetName, String targetHost, int targetPort, int inboundSpyPort, int outboundSpyPort) {
+            this.sourceName = sourceName;
+            this.sourcePort = sourcePort;
+            this.targetName = targetName;
+            this.targetHost = targetHost;
+            this.targetPort = targetPort;
+            this.inboundSpyPort = inboundSpyPort;
+            this.outboundSpyPort = outboundSpyPort;
+        }
+
+        public WirespyClient as (Protocol protocol) {
+            return as(protocol, x -> x);
+        }
+
+        public WirespyClient as (Protocol protocol, Function<Integer, Integer> portMapper) {
             try {
                 HttpPost request = new HttpPost(String.format("http://%s:%d/__admin/add", host, port));
                 request.setEntity(new StringEntity(
                         new JSONObject()
                                 .put("sourceName", sourceName)
                                 .put("sourcePort", sourcePort)
+                                .put("inStreamPort", inboundSpyPort)
                                 .put("targetName", targetName)
                                 .put("targetHost", targetHost)
                                 .put("targetPort", targetPort)
-                        .toString()
+                                .put("outStreamPort", outboundSpyPort)
+                                .toString()
                 ));
 
                 HttpResponse response = httpClient.execute(request);
                 JSONObject body = bodyFromResponse(response.getEntity().getContent());
 
-                Socket inStreamSocket = new Socket(host, body.getInt("inStreamPort"));
-                Socket outStreamSocket = new Socket(host, body.getInt("outStreamPort"));
+                Socket inStreamSocket = new Socket(host, portMapper.apply(body.getInt("inStreamPort")));
+                Socket outStreamSocket = new Socket(host, portMapper.apply(body.getInt("outStreamPort")));
 
                 captureService.create(new WirespyCaptureService.CaptureStream(
                         sourceName,
@@ -124,7 +167,7 @@ public class WirespyClient implements Closeable {
                         protocol.getReceiveSequencer()
                 ));
             } catch (Throwable e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(String.format("Could not create new TCP proxy in %s:%d", host, port), e);
             }
 
             return WirespyClient.this;

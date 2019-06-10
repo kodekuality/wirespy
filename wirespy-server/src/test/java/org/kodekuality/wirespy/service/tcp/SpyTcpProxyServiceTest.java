@@ -37,7 +37,7 @@ public class SpyTcpProxyServiceTest {
         SpyTcpSession spyTcpSession = spyTcpProxyService.startSpySession(new SpySource(
                 "A",
                 12311
-        ), new SpyTarget("B", "localhost", 12312));
+        ), new SpyTarget("B", "localhost", 12312), 0, 0);
 
         ByteArrayOutputStream inStreamMemory = new ByteArrayOutputStream();
         ByteArrayOutputStream outStreamMemory = new ByteArrayOutputStream();

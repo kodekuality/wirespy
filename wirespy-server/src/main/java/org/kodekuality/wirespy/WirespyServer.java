@@ -26,7 +26,7 @@ public class WirespyServer implements Closeable {
 
     public WirespyServer start () throws Exception {
         httpServer.start();
-        logger.info("Wirepsy admin API started on {}", getPort());
+        logger.info("Wirespy admin API started on {}", getPort());
         return this;
     }
 

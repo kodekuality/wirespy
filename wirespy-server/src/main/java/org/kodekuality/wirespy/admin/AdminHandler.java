@@ -33,7 +33,7 @@ public class AdminHandler extends AbstractHandler {
                 request.getTargetName(),
                 request.getTargetHost(),
                 request.getTargetPort()
-        ));
+        ), request.getInStreamPort(), request.getOutStreamPort());
 
         objectMapper.writeValue(response.getOutputStream(), new AddProxyResponse(
                 spyTcpSession.getInStreamPort(),
