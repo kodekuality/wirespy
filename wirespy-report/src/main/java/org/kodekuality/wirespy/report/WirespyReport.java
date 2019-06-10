@@ -8,16 +8,23 @@ import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import org.kodekuality.wirespy.protocol.Frame;
+import org.kodekuality.wirespy.watcher.message.WireSpyMessage;
+import org.kodekuality.wirespy.watcher.message.WireSpyMessageReceiver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class WirespyReport {
+public class WirespyReport implements WireSpyMessageReceiver {
     public static WirespyReport wirespyReport(File baseDir) {
         final Handlebars handlebars = new Handlebars(new ClassPathTemplateLoader("", ""));
         StringHelpers.register(handlebars);
@@ -57,6 +64,7 @@ public class WirespyReport {
         );
     }
 
+    private final List<WireSpyMessage> messages = new CopyOnWriteArrayList<>();
     private final File baseDir;
     private final CopyStaticResourcesService copyStaticResourcesService;
     private final GenerateReportService generateReportService;
@@ -68,12 +76,17 @@ public class WirespyReport {
         this.generateReportService = generateReportService;
     }
 
-    public WirespyReport generate(String file, Request request) throws IOException {
+    public WirespyReport generate(String file, String title) throws IOException {
         if (!staticGenerated.getAndSet(true)) {
             copyStaticResourcesService.copyTo(baseDir);
         }
         try {
-            generateReportService.generate(new File(baseDir, file), request);
+            generateReportService.generate(new File(baseDir, file), new Request(
+                    title,
+                    Collections.unmodifiableList(messages).stream()
+                        .sorted(Comparator.comparingLong(WireSpyMessage::getNanoTimeRecorded))
+                        .collect(Collectors.toList())
+            ));
         } catch (IOException | RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -83,4 +96,12 @@ public class WirespyReport {
     }
 
 
+    @Override
+    public void handle(WireSpyMessage message) {
+        messages.add(message);
+    }
+
+    public void reset () {
+        messages.clear();
+    }
 }

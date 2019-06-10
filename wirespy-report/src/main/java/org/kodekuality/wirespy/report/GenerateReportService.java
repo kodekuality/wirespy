@@ -1,8 +1,8 @@
 package org.kodekuality.wirespy.report;
 
 import com.github.jknack.handlebars.Template;
-import org.kodekuality.wirespy.messages.Message;
 import org.kodekuality.wirespy.protocol.Frame;
+import org.kodekuality.wirespy.watcher.message.WireSpyMessage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,7 +36,7 @@ public class GenerateReportService {
         }
     }
 
-    private List<MessageView> toMessagesView (List<Message> messages) {
+    private List<MessageView> toMessagesView (List<WireSpyMessage> messages) {
         ArrayList<MessageView> result = new ArrayList<>();
         for (int i = 0; i < messages.size(); i++) {
             result.add(toMessageView(i+1, messages.get(i)));
@@ -44,7 +44,7 @@ public class GenerateReportService {
         return result;
     }
 
-    private MessageView toMessageView(int index, Message message) {
+    private MessageView toMessageView(int index, WireSpyMessage message) {
         return new MessageView(
                 index,
                 message.getFrom(),

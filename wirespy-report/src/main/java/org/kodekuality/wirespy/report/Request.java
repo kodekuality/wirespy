@@ -1,14 +1,15 @@
 package org.kodekuality.wirespy.report;
 
-import org.kodekuality.wirespy.messages.Message;
+
+import org.kodekuality.wirespy.watcher.message.WireSpyMessage;
 
 import java.util.List;
 
 public class Request {
     private final String title;
-    private final List<Message> messages;
+    private final List<WireSpyMessage> messages;
 
-    public Request(String title, List<Message> messages) {
+    public Request(String title, List<WireSpyMessage> messages) {
         this.title = title;
         this.messages = messages;
     }
@@ -17,7 +18,7 @@ public class Request {
         return title;
     }
 
-    public List<Message> getMessages() {
+    public List<WireSpyMessage> getMessages() {
         return messages;
     }
 }

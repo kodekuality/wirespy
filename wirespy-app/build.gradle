@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.google.cloud.tools.jib' version '1.2.0'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 
 group 'org.kodekuality'
@@ -13,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":wirespy-server")
+    compile project(":wirespy-proxy")
     compile 'ch.qos.logback:logback-classic:1.2.3'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -34,6 +35,19 @@ jib {
 
     container {
         jvmFlags = ['-Xms512m']
-        ports = ['9191']
+        ports = ['9191', '9192', '9090']
+        environment = [
+                'INPUT_PORT' : '9090',
+                'TARGET_HOST': 'localhost',
+                'TARGET_PORT': '8080',
+                'SPY_INBOUND': '9191',
+                'SPY_OUTBOUND': '9192',
+        ]
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.kodekuality.wirespy.app.WirespyApp'
     }
 }

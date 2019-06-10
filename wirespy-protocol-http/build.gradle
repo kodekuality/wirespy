@@ -15,13 +15,10 @@ repositories {
 }
 
 dependencies {
-    compile project(":wirespy-watcher")
-    compile 'commons-io:commons-io:2.6'
-    compile 'org.reflections:reflections:0.9.11'
-    compile 'com.github.jknack:handlebars:4.1.2'
+    compile project(":wirespy-protocol")
+    compile 'com.athaydes.rawhttp:rawhttp-core:2.2'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'org.hamcrest:hamcrest-core:2.1'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -46,7 +43,7 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             groupId "org.kodekuality"
-            artifactId "wirespy-report"
+            artifactId "wirespy-protocol-http"
             version System.getenv('TRAVIS_TAG') ?: "SNAPSHOT"
         }
     }
@@ -66,7 +63,7 @@ bintray {
     publish = true
     pkg {
         repo = 'maven'
-        name = "wirespy-report"
+        name = "wirespy-protocol-http"
         userOrg = 'kodekuality'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/kodekuality/wirespy.git'

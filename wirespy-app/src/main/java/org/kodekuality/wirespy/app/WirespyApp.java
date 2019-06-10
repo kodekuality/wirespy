@@ -1,18 +1,26 @@
 package org.kodekuality.wirespy.app;
 
-import org.kodekuality.wirespy.WirespyServer;
+
+import org.kodekuality.wirespy.proxy.WireSpyProxy;
 
 public class WirespyApp {
     public static void main(String[] args) throws Exception {
-        WirespyServer.wirespyServer(getPort()).start().join();
+        WireSpyProxy.from(Integer.parseInt(getString("INPUT_PORT", "9090")))
+                .to(getString("TARGET_HOST", "localhost"), Integer.parseInt(getString("TARGET_PORT", "8080")))
+                .spyOn(
+                        Integer.parseInt(getString("SPY_INBOUND", "9191")),
+                        Integer.parseInt(getString("SPY_INBOUND", "9192"))
+                )
+                .startProxy()
+                .awaitTermination();
     }
 
-    private static int getPort() {
-        String port = System.getenv("PORT");
-        if (port == null || port.matches("[0-9]{4,5}")) {
-            return 9191;
+    private static String getString(String name, String defaultValue) {
+        String value = System.getenv(name);
+        if (value == null || value.trim().equals("")) {
+            return System.getProperty(name, defaultValue);
         } else {
-            return Integer.parseInt(port);
+            return value;
         }
     }
 }

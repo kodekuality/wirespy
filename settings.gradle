@@ -1,7 +1,9 @@
 rootProject.name = 'wirespy'
-include 'wirespy-server'
 include 'wirespy-app'
-include 'wirespy-client'
 include 'wirespy-report'
-include 'wirespy-junit4'
+include 'wirespy-acceptance-tests'
+include 'wirespy-proxy'
+include 'wirespy-watcher'
+include 'wirespy-protocol-http'
+include 'wirespy-protocol'
 
