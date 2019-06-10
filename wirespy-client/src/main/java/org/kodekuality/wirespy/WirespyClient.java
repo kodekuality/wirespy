@@ -100,16 +100,24 @@ public class WirespyClient implements Closeable {
             return new SpyPortsBuilder(
                     sourceName, sourcePort,
                     targetName, targetHost, targetPort,
-                    inboundSpyPort, outboudSpyPort
-            );
+                    inboundSpyPort, outboudSpyPort,
+                    x -> x);
+        }
+
+        public SpyPortsBuilder spyOn (int inboundSpyPort, int outboudSpyPort, Function<Integer, Integer> portMapper) {
+            return new SpyPortsBuilder(
+                    sourceName, sourcePort,
+                    targetName, targetHost, targetPort,
+                    inboundSpyPort, outboudSpyPort,
+                    portMapper);
         }
 
         public WirespyClient as (Protocol protocol) {
             return new SpyPortsBuilder(
                     sourceName, sourcePort,
                     targetName, targetHost, targetPort,
-                    0, 0
-            ).as(protocol);
+                    0, 0,
+                    x -> x).as(protocol);
         }
     }
 
@@ -121,8 +129,9 @@ public class WirespyClient implements Closeable {
         private final int targetPort;
         private final int inboundSpyPort;
         private final int outboundSpyPort;
+        private final Function<Integer, Integer> portMapper;
 
-        public SpyPortsBuilder(String sourceName, int sourcePort, String targetName, String targetHost, int targetPort, int inboundSpyPort, int outboundSpyPort) {
+        public SpyPortsBuilder(String sourceName, int sourcePort, String targetName, String targetHost, int targetPort, int inboundSpyPort, int outboundSpyPort, Function<Integer, Integer> portMapper) {
             this.sourceName = sourceName;
             this.sourcePort = sourcePort;
             this.targetName = targetName;
@@ -130,13 +139,10 @@ public class WirespyClient implements Closeable {
             this.targetPort = targetPort;
             this.inboundSpyPort = inboundSpyPort;
             this.outboundSpyPort = outboundSpyPort;
+            this.portMapper = portMapper;
         }
 
         public WirespyClient as (Protocol protocol) {
-            return as(protocol, x -> x);
-        }
-
-        public WirespyClient as (Protocol protocol, Function<Integer, Integer> portMapper) {
             try {
                 HttpPost request = new HttpPost(String.format("http://%s:%d/__admin/add", host, port));
                 request.setEntity(new StringEntity(
