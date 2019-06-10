@@ -3,63 +3,63 @@ package org.kodekuality.wirespy.service;
 import org.kodekuality.wirespy.messages.Message;
 import org.kodekuality.wirespy.protocol.FrameSequencer;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public class WirespyCaptureService {
-    private final List<Socket> createdSockets = new CopyOnWriteArrayList<>();
+public class WirespyCaptureService implements Closeable {
     private final Consumer<Message> messageConsumer;
+    private final List<Closeable> closeables = new CopyOnWriteArrayList<>();
 
     public WirespyCaptureService(Consumer<Message> messageConsumer) {
         this.messageConsumer = messageConsumer;
     }
 
     public void create(CaptureStream sent, CaptureStream received) {
-        Thread sentThread = new Thread(new CaptureStreamRunner(
-                sent.getName(),
-                received.getName(),
-                sent.getSocket(),
-                sent.getSequencer(),
-                messageConsumer
-        ), String.format("from-%s-to-%s-%d", sent.getName(), received.getName(), sent.getSocket().getLocalPort()));
-        createdSockets.add(sent.getSocket());
-        sentThread.setDaemon(true);
-        sentThread.start();
-        Thread receiveThread = new Thread(new CaptureStreamRunner(
-                received.getName(),
-                sent.getName(),
-                received.getSocket(),
-                received.getSequencer(),
-                messageConsumer
-        ), String.format("from-%s-to-%s-%d", received.getName(), sent.getName(), received.getSocket().getLocalPort()));
-        receiveThread.setDaemon(true);
-        createdSockets.add(received.getSocket());
-        receiveThread.start();
+        process(sent, received);
+        process(received, sent);
     }
 
-    public void stop() {
-        for (Socket createdSocket : createdSockets) {
+    private void process(CaptureStream sent, CaptureStream received) {
+        CaptureStreamRunner inboundStreamRunner = new CaptureStreamRunner(
+                sent.getName(),
+                received.getName(),
+                sent.getSocketSupplier(),
+                sent.getSequencer(),
+                messageConsumer
+        );
+        closeables.add(inboundStreamRunner);
+
+        Thread sentThread = new Thread(inboundStreamRunner, String.format("from-%s-to-%s", sent.getName(), received.getName()));
+        sentThread.setDaemon(true);
+        sentThread.start();
+    }
+
+    @Override
+    public void close() {
+        for (Closeable closeable : closeables) {
             try {
-                createdSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                closeable.close();
+            } catch (Exception e) {
+
             }
         }
-
-        createdSockets.clear();
+        closeables.clear();
     }
 
     public static class CaptureStream {
         private final String name;
-        private final Socket socket;
+        private final SocketFactory socketSupplier;
         private final FrameSequencer sequencer;
 
-        public CaptureStream(String name, Socket socket, FrameSequencer sequencer) {
+        public CaptureStream(String name, SocketFactory socketSupplier, FrameSequencer sequencer) {
             this.name = name;
-            this.socket = socket;
+            this.socketSupplier = socketSupplier;
             this.sequencer = sequencer;
         }
 
@@ -67,8 +67,8 @@ public class WirespyCaptureService {
             return name;
         }
 
-        public Socket getSocket() {
-            return socket;
+        public SocketFactory getSocketSupplier() {
+            return socketSupplier;
         }
 
         public FrameSequencer getSequencer() {
@@ -76,17 +76,18 @@ public class WirespyCaptureService {
         }
     }
 
-    private static class CaptureStreamRunner implements Runnable {
+    private static class CaptureStreamRunner implements Runnable, Closeable {
         private final String from;
         private final String to;
-        private final Socket socket;
+        private final SocketFactory socketFactory;
         private final FrameSequencer sequencer;
         private final Consumer<Message> messageConsumer;
+        private final AtomicReference<Socket> currentSocket = new AtomicReference<>();
 
-        public CaptureStreamRunner(String from, String to, Socket socket, FrameSequencer sequencer, Consumer<Message> messageConsumer) {
+        public CaptureStreamRunner(String from, String to, SocketFactory socketSupplier, FrameSequencer sequencer, Consumer<Message> messageConsumer) {
             this.from = from;
             this.to = to;
-            this.socket = socket;
+            this.socketFactory = socketSupplier;
             this.sequencer = sequencer;
             this.messageConsumer = messageConsumer;
         }
@@ -94,15 +95,33 @@ public class WirespyCaptureService {
         @Override
         public void run() {
             try {
-                sequencer.sequence(socket.getInputStream(), frame -> messageConsumer.accept(new Message(
-                        System.nanoTime(),
-                        from,
-                        to,
-                        frame
-                )));
-            } catch (IOException ignored) {
+                while (true) {
+                    try (Socket socket = currentSocket.updateAndGet(x -> socketFactory.create())) {
+                        sequencer.sequence(socket.getInputStream(), frame -> messageConsumer.accept(new Message(
+                                System.nanoTime(),
+                                from,
+                                to,
+                                frame
+                        )));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Throwable e) {
 
             }
+        }
+
+        @Override
+        public void close() throws IOException {
+            Optional.ofNullable(currentSocket.get())
+                    .ifPresent(x -> {
+                        try {
+                            x.close();
+                        } catch (IOException e) {
+
+                        }
+                    });
         }
     }
 }

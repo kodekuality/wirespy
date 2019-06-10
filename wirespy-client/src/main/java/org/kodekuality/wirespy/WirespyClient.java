@@ -9,10 +9,10 @@ import org.json.JSONObject;
 import org.kodekuality.wirespy.messages.Message;
 import org.kodekuality.wirespy.messages.MessageCollector;
 import org.kodekuality.wirespy.protocol.Protocol;
+import org.kodekuality.wirespy.service.SocketFactory;
 import org.kodekuality.wirespy.service.WirespyCaptureService;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.List;
 import java.util.function.Function;
 
@@ -56,7 +56,7 @@ public class WirespyClient implements Closeable {
 
     @Override
     public void close() throws IOException {
-        captureService.stop();
+        captureService.close();
     }
 
     public class FromProxyBuilder {
@@ -160,16 +160,13 @@ public class WirespyClient implements Closeable {
                 HttpResponse response = httpClient.execute(request);
                 JSONObject body = bodyFromResponse(response.getEntity().getContent());
 
-                Socket inStreamSocket = new Socket(host, portMapper.apply(body.getInt("inStreamPort")));
-                Socket outStreamSocket = new Socket(host, portMapper.apply(body.getInt("outStreamPort")));
-
                 captureService.create(new WirespyCaptureService.CaptureStream(
                         sourceName,
-                        inStreamSocket,
+                        new SocketFactory(host, portMapper.apply(body.getInt("inStreamPort"))),
                         protocol.getSendSequencer()
                 ), new WirespyCaptureService.CaptureStream(
                         targetName,
-                        outStreamSocket,
+                        new SocketFactory(host, portMapper.apply(body.getInt("outStreamPort"))),
                         protocol.getReceiveSequencer()
                 ));
             } catch (Throwable e) {
