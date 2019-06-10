@@ -13,18 +13,16 @@ import org.kodekuality.wirespy.watcher.message.WireSpyMessageReceiver;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class WirespyReport implements WireSpyMessageReceiver {
+public class WirespyReport {
     public static WirespyReport wirespyReport(File baseDir) {
         final Handlebars handlebars = new Handlebars(new ClassPathTemplateLoader("", ""));
         StringHelpers.register(handlebars);
@@ -64,7 +62,6 @@ public class WirespyReport implements WireSpyMessageReceiver {
         );
     }
 
-    private final List<WireSpyMessage> messages = new CopyOnWriteArrayList<>();
     private final File baseDir;
     private final CopyStaticResourcesService copyStaticResourcesService;
     private final GenerateReportService generateReportService;
@@ -76,14 +73,14 @@ public class WirespyReport implements WireSpyMessageReceiver {
         this.generateReportService = generateReportService;
     }
 
-    public WirespyReport generate(String file, String title) throws IOException {
+    public WirespyReport generate(String file, String title, List<WireSpyMessage> messages) throws IOException {
         if (!staticGenerated.getAndSet(true)) {
             copyStaticResourcesService.copyTo(baseDir);
         }
         try {
             generateReportService.generate(new File(baseDir, file), new Request(
                     title,
-                    Collections.unmodifiableList(messages).stream()
+                    messages.stream()
                         .sorted(Comparator.comparingLong(WireSpyMessage::getNanoTimeRecorded))
                         .collect(Collectors.toList())
             ));
@@ -93,15 +90,5 @@ public class WirespyReport implements WireSpyMessageReceiver {
             throw new IOException(e);
         }
         return this;
-    }
-
-
-    @Override
-    public void handle(WireSpyMessage message) {
-        messages.add(message);
-    }
-
-    public void reset () {
-        messages.clear();
     }
 }

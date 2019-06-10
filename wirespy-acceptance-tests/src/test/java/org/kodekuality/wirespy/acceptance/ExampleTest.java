@@ -7,6 +7,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.junit.*;
 import org.kodekuality.wirespy.protocol.http.HttpProtocol;
 import org.kodekuality.wirespy.report.Request;
+import org.kodekuality.wirespy.report.WireSpyMessageCollector;
 import org.kodekuality.wirespy.report.WirespyReport;
 import org.kodekuality.wirespy.watcher.WireSpyWatcher;
 
@@ -18,6 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 public class ExampleTest {
     @Test
     public void test1() throws UnirestException, IOException {
+        WireSpyMessageCollector wireSpyMessageCollector = new WireSpyMessageCollector();
         TestEnvironment testEnvironment = new TestEnvironment();
         testEnvironment.start();
 
@@ -30,12 +32,12 @@ public class ExampleTest {
                 .from("UI", testEnvironment.getUserToOrchestrator().getInSpyPort())
                 .to("Backend", testEnvironment.getUserToOrchestrator().getOutSpyPort())
                 .as(HttpProtocol.http())
-                .publishTo(wirespyReport)
+                .publishTo(wireSpyMessageCollector)
                 .watch("localhost")
                 .from("Backend", testEnvironment.getOrchestratorToDependency().getInSpyPort())
                 .to("Dependency", testEnvironment.getOrchestratorToDependency().getOutSpyPort())
                 .as(HttpProtocol.http())
-                .publishTo(wirespyReport);
+                .publishTo(wireSpyMessageCollector);
 
         try {
             HttpResponse<String> result1 = Unirest
@@ -43,7 +45,7 @@ public class ExampleTest {
                     .asString();
             System.out.println(result1.getBody());
         } finally {
-            wirespyReport.generate("test1.html", "Scenario");
+            wirespyReport.generate("test1.html", "Scenario", wireSpyMessageCollector.get());
         }
 
         testEnvironment.stop();
