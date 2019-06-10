@@ -11,14 +11,11 @@ import org.kodekuality.wirespy.messages.MessageCollector;
 import org.kodekuality.wirespy.protocol.Protocol;
 import org.kodekuality.wirespy.service.WirespyCaptureService;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-public class WirespyClient {
+public class WirespyClient implements Closeable {
     private static final MessageCollector MESSAGE_COLLECTOR = new MessageCollector();
 
     public static WirespyClient wirespyClient(String host, int port) {
@@ -54,6 +51,11 @@ public class WirespyClient {
 
     public FromProxyBuilder from(String name, int proxyPort) {
         return new FromProxyBuilder(name, proxyPort);
+    }
+
+    @Override
+    public void close() throws IOException {
+        captureService.stop();
     }
 
     public class FromProxyBuilder {
@@ -93,7 +95,7 @@ public class WirespyClient {
             this.targetPort = targetPort;
         }
 
-        public void as (Protocol protocol) {
+        public WirespyClient as (Protocol protocol) {
             try {
                 HttpPost request = new HttpPost(String.format("http://%s:%d/__admin/add", host, port));
                 request.setEntity(new StringEntity(
@@ -124,6 +126,8 @@ public class WirespyClient {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
+
+            return WirespyClient.this;
         }
     }
 

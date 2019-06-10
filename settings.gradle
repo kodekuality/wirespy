@@ -3,4 +3,5 @@ include 'wirespy-server'
 include 'wirespy-app'
 include 'wirespy-client'
 include 'wirespy-report'
+include 'wirespy-junit4'
 

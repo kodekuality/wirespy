@@ -35,10 +35,8 @@ public class FixServer {
                     new DefaultMessageFactory()
             ));
             socketAcceptor.get().start();
-        } catch (ConfigError configError) {
+        } catch (ConfigError | IOException configError) {
             throw new RuntimeException(configError);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -5,9 +5,12 @@ import org.kodekuality.wirespy.protocol.FrameSequencer;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public class WirespyCaptureService {
+    private final List<Socket> createdSockets = new CopyOnWriteArrayList<>();
     private final Consumer<Message> messageConsumer;
 
     public WirespyCaptureService(Consumer<Message> messageConsumer) {
@@ -22,6 +25,7 @@ public class WirespyCaptureService {
                 sent.getSequencer(),
                 messageConsumer
         ), String.format("from-%s-to-%s-%d", sent.getName(), received.getName(), sent.getSocket().getLocalPort()));
+        createdSockets.add(sent.getSocket());
         sentThread.setDaemon(true);
         sentThread.start();
         Thread receiveThread = new Thread(new CaptureStreamRunner(
@@ -32,7 +36,20 @@ public class WirespyCaptureService {
                 messageConsumer
         ), String.format("from-%s-to-%s-%d", received.getName(), sent.getName(), received.getSocket().getLocalPort()));
         receiveThread.setDaemon(true);
+        createdSockets.add(received.getSocket());
         receiveThread.start();
+    }
+
+    public void stop() {
+        for (Socket createdSocket : createdSockets) {
+            try {
+                createdSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        createdSockets.clear();
     }
 
     public static class CaptureStream {
@@ -83,8 +100,8 @@ public class WirespyCaptureService {
                         to,
                         frame
                 )));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ignored) {
+
             }
         }
     }

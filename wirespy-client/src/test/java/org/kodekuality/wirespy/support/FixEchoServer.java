@@ -41,7 +41,7 @@ public class FixEchoServer {
                             ),
                             fixPort
                     ).getBytes()));
-                    SocketInitiator socketInitiator = new SocketInitiator(
+                    ThreadedSocketInitiator socketInitiator = new ThreadedSocketInitiator(
                             new FixApp(IOUtils.toString(request.getInputStream(), Charset.defaultCharset()), completableFuture),
                             new MemoryStoreFactory(),
                             settings,
