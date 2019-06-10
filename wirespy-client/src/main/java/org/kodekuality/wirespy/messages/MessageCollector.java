@@ -10,6 +10,7 @@ public class MessageCollector implements Consumer<Message> {
 
     @Override
     public void accept(Message message) {
+        System.out.println("Received");
         messages.add(message);
     }
 

@@ -1,13 +1,22 @@
 package org.kodekuality.wirespy.service.tcp.socket;
 
 import java.io.Closeable;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class IOUtils {
     private IOUtils () {}
     public static void silentlyFlush (Socket socket) {
         try {
-            socket.getOutputStream().flush();
+            silentlyFlush(socket.getOutputStream());
+        } catch (Throwable e) {
+            // ignored
+        }
+    }
+
+    public static void silentlyFlush (OutputStream outputStream) {
+        try {
+            outputStream.flush();
         } catch (Throwable e) {
             // ignored
         }

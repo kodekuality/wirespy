@@ -21,6 +21,7 @@ dependencies {
     compile project(":wirespy-report")
 
     testCompile 'com.mashape.unirest:unirest-java:1.4.9'
+    testCompile 'org.slf4j:slf4j-simple:1.7.26'
 }
 
 

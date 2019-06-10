@@ -4,30 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.kodekuality.wirespy.admin.AdminHandler;
-import org.kodekuality.wirespy.service.stream.StreamCopierFactory;
-import org.kodekuality.wirespy.service.tcp.SocketAcceptService;
-import org.kodekuality.wirespy.service.tcp.SocketSpyServerFactory;
-import org.kodekuality.wirespy.service.tcp.SocketSpyServiceFactory;
-import org.kodekuality.wirespy.service.tcp.SocketSpySessionService;
+import org.kodekuality.wirespy.service.tcp.SpyTcpProxyService;
 
 public class WirespyServerFactory {
     public TinyServer create (WirespyConfiguration configuration) {
         Server server = new Server(configuration.getPort());
-        SocketSpySessionService socketSpySessionService = new SocketSpySessionService(new SocketSpyServerFactory(
-                new SocketAcceptService(),
-                new SocketSpyServiceFactory(new StreamCopierFactory())
-        ));
-        server.setHandler(new AdminHandler(new ObjectMapper(), socketSpySessionService));
-        return new TinyJettyServer(server, socketSpySessionService);
+        SpyTcpProxyService spyTcpProxyService = new SpyTcpProxyService();
+        server.setHandler(new AdminHandler(new ObjectMapper(), spyTcpProxyService));
+        return new TinyJettyServer(server, spyTcpProxyService);
     }
 
     private static class TinyJettyServer implements TinyServer {
         private final Server server;
-        private SocketSpySessionService socketSpySessionService;
+        private SpyTcpProxyService spyTcpProxyService;
 
-        private TinyJettyServer(Server server, SocketSpySessionService socketSpySessionService) {
+        private TinyJettyServer(Server server, SpyTcpProxyService spyTcpProxyService) {
             this.server = server;
-            this.socketSpySessionService = socketSpySessionService;
+            this.spyTcpProxyService = spyTcpProxyService;
         }
 
         @Override
@@ -38,7 +31,7 @@ public class WirespyServerFactory {
 
         @Override
         public TinyServer stop() throws Exception {
-            socketSpySessionService.stop();
+            spyTcpProxyService.close();
 
             server.stop();
             server.join();

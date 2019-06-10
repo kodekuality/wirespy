@@ -31,7 +31,12 @@ public class InitiatorSocketFactory implements SocketFactory {
     }
 
     @Override
-    public Socket create() throws IOException {
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public Socket create() {
         CompletableFuture<Socket> socketCompletableFuture = new CompletableFuture<>();
         executorService.execute(() -> {
             do {

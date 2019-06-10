@@ -5,5 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 
 public interface SocketFactory extends Closeable {
-    Socket create () throws IOException;
+    int getPort ();
+    Socket create ();
 }

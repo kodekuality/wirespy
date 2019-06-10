@@ -1,15 +1,13 @@
 package org.kodekuality.wirespy.service.stream;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
 
-public class StreamCopier implements Callable<Boolean> {
+public class StreamCopier implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(StreamCopier.class);
 
     private final String inputName;
@@ -23,8 +21,8 @@ public class StreamCopier implements Callable<Boolean> {
     }
 
     @Override
-    public Boolean call() {
-        try {
+    public void run() {
+        try (OutputStream outputStream = this.outputStream) {
             // Not optimised so information goes as fast as possible
             int read = inputStream.read();
 
@@ -33,10 +31,8 @@ public class StreamCopier implements Callable<Boolean> {
                 read = inputStream.read();
             }
 
-            return true;
         } catch (IOException e) {
             logger.debug("Error while reading from {}", inputName, e);
-            return false;
         }
     }
 }

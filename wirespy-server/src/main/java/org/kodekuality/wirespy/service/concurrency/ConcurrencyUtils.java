@@ -1,5 +1,7 @@
 package org.kodekuality.wirespy.service.concurrency;
 
+import org.kodekuality.wirespy.service.tcp.socket.ListenerSocketFactory;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -33,11 +35,11 @@ public class ConcurrencyUtils {
         }
     }
 
-    public static <T> T getOrRethrow(Future<T> future) throws IOException {
+    public static <T> T getOrRethrow(Future<T> future) {
         try {
             return future.get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new IOException(e);
+            throw new ListenerSocketFactory.NoLongerAcceptingException(e);
         }
     }
 }

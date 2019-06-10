@@ -8,40 +8,56 @@ import java.net.Socket;
 import java.util.function.Function;
 
 public class EchoServer implements TinyServer {
-    public static EchoServer create (int port, Function<Integer, Integer> transform) throws IOException {
+    public static EchoServer create(int port, Function<Integer, Integer> transform) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
         return new EchoServer(
                 serverSocket,
                 new Thread(() -> {
-                    try {
-                        Socket accept = serverSocket.accept();
-
-                        int read = accept.getInputStream().read();
-                        while (read != -1) {
-                            accept.getOutputStream().write(transform.apply(read));
-                            read = accept.getInputStream().read();
+                    while (true) {
+                        Socket accept;
+                        try {
+                            accept = serverSocket.accept();
+                        } catch (Exception e) {
+                            return;
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+                        try {
+                            int read = accept.getInputStream().read();
+                            while (read != -1) {
+                                accept.getOutputStream().write(transform.apply(read));
+                                read = accept.getInputStream().read();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
         );
     }
-    public static EchoServer create (int port) throws IOException {
+
+    public static EchoServer create(int port) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
         return new EchoServer(
                 serverSocket,
                 new Thread(() -> {
-                    try {
-                        Socket accept = serverSocket.accept();
-
-                        int read = accept.getInputStream().read();
-                        while (read != -1) {
-                            accept.getOutputStream().write(read);
-                            read = accept.getInputStream().read();
+                    while (true) {
+                        Socket accept;
+                        try {
+                            accept = serverSocket.accept();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return;
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+                        try {
+                            int read = accept.getInputStream().read();
+                            while (read != -1) {
+                                accept.getOutputStream().write(read);
+                                read = accept.getInputStream().read();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
         );

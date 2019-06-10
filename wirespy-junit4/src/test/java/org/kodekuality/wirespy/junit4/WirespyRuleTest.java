@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 public class WirespyRuleTest {
     @Rule
     public WirespyRule wirespyRule = WirespyRule.wirespy(8080)
-            .client(client -> {
+            .configure(client -> {
                 client.from("A", 9091).to("B", 9092).as(HttpProtocol.http());
             })
             .withReport(WirespyReport.wirespyReport(new File("build/wirespy-report")));

@@ -25,11 +25,20 @@ public class ListenerSocketFactory implements SocketFactory {
     }
 
     @Override
-    public Socket create() throws IOException {
-        Socket accept = serverSocket.accept();
-        logger.info("Connection initiated with {} on {}", name, serverSocket.getLocalPort());
-        acceptedSockets.add(accept);
-        return accept;
+    public int getPort() {
+        return serverSocket.getLocalPort();
+    }
+
+    @Override
+    public Socket create() {
+        try {
+            Socket accept = serverSocket.accept();
+            logger.info("Connection initiated with {} on {}", name, serverSocket.getLocalPort());
+            acceptedSockets.add(accept);
+            return accept;
+        } catch (IOException e) {
+            throw new NoLongerAcceptingException(e);
+        }
     }
 
     @Override
@@ -41,5 +50,11 @@ public class ListenerSocketFactory implements SocketFactory {
             acceptedSockets.remove(acceptedSocket);
         }
         serverSocket.close();
+    }
+
+    public static class NoLongerAcceptingException extends RuntimeException {
+        public NoLongerAcceptingException(Throwable cause) {
+            super(cause);
+        }
     }
 }

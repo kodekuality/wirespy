@@ -1,8 +1,8 @@
 package org.kodekuality.wirespy.service.concurrency;
 
 import org.junit.Test;
+import org.kodekuality.wirespy.service.tcp.socket.ListenerSocketFactory;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -28,7 +28,7 @@ public class ConcurrencyUtilsTest {
         ConcurrencyUtils.runSilently(callable);
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = ListenerSocketFactory.NoLongerAcceptingException.class)
     public void getOrRethrow() throws Exception {
         Future future = mock(Future.class);
 

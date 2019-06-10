@@ -152,7 +152,8 @@ public class WirespyServerTest {
 
             Socket socket = new Socket("localhost", 8081);
 
-            socket.getOutputStream().write(3); socket.getOutputStream().flush();
+            socket.getOutputStream().write(3);
+            socket.getOutputStream().flush();
             assertThat(inStream.getInputStream().read(), Matchers.is(3));
 
             assertThat(outStream.getInputStream().read(), Matchers.is(4));
@@ -160,7 +161,7 @@ public class WirespyServerTest {
         }
     }
 
-    @Test (expected = TimeoutException.class)
+    @Test(expected = TimeoutException.class)
     public void join() throws Exception {
         try (WirespyServer wirespyServer = WirespyServer.wirespyServer(0)) {
             EXECUTOR_SERVICE.submit(() -> {
